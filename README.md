@@ -4,6 +4,8 @@ A minimalist to-do list that organises tasks by the **[Eisenhower method](https:
 
 **[▶ Live demo](https://omershubi.github.io/priority-matrix/)**
 
+![Priority Matrix — a to-do list organised into a 2×2 importance/urgency matrix with Do First, Schedule, Delegate, and Eliminate quadrants](screenshot.png)
+
 No account, no server, no build step — a single self-contained HTML file. Your data is saved locally in your browser.
 
 ## The matrix

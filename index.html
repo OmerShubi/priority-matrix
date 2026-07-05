@@ -47,8 +47,6 @@
   .app-title{ font-size:34px; font-weight:800; margin:0; letter-spacing:-.01em; display:flex; align-items:center; gap:12px; }
   .wig{ display:inline-block; transform-origin:60% 80%; animation:wig 3.6s ease-in-out infinite; }
   @keyframes wig{ 0%,70%,100%{transform:rotate(0)} 80%{transform:rotate(-16deg)} 90%{transform:rotate(12deg)} }
-  .ghost-link{ color:var(--muted); text-decoration:none; font-weight:700; font-size:14px; border-bottom:2px solid transparent; }
-  .ghost-link:hover{ color:var(--ink); border-bottom-color:var(--ink); }
   .tagline{ margin:8px 2px 20px; color:var(--muted); font-size:15px; font-weight:500; }
   .tagline b{ color:var(--ink); }
 
@@ -69,7 +67,7 @@
 
   .add-row{ display:flex; gap:10px; }
   #new-task{
-    flex:1; font:inherit; font-size:16px; font-weight:500; color:var(--ink);
+    flex:1; min-width:0; font:inherit; font-size:16px; font-weight:500; color:var(--ink);
     border:2px solid var(--ink); border-radius:11px; padding:12px 14px; background:var(--card); outline:none;
   }
   #new-task::placeholder{ color:rgba(51,50,46,.5); font-weight:500; }
@@ -163,6 +161,10 @@
     .app-title{ font-size:28px; }
     .toolbar{ justify-content:flex-start; }
   }
+  @media (max-width:480px){
+    .add-row{ flex-direction:column; align-items:stretch; }
+    #add-btn{ width:100%; }
+  }
 </style>
 </head>
 <body>
@@ -172,7 +174,6 @@
     <header>
       <div class="titlebar">
         <h1 class="app-title"><span class="wig">🎯</span> Priority Matrix</h1>
-        <a class="ghost-link" href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">design ↗</a>
       </div>
       <p class="tagline">A to-do list split by the Eisenhower method — decide every task by <b>importance</b> and <b>urgency</b>. Drag cards between quadrants to re-prioritise.</p>
 
@@ -584,6 +585,15 @@
     };
     reader.readAsText(file);
   });
+
+  /* ---------- responsive placeholder ---------- */
+  var phMq = window.matchMedia("(max-width: 520px)");
+  function setPlaceholder(){
+    input.placeholder = phMq.matches ? "Add a task…" : "What needs doing? Press Enter to add…";
+  }
+  setPlaceholder();
+  if(phMq.addEventListener) phMq.addEventListener("change", setPlaceholder);
+  else if(phMq.addListener) phMq.addListener(setPlaceholder);
 
   /* ---------- go ---------- */
   syncToggleLabel();
