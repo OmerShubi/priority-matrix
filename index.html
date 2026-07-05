@@ -10,8 +10,50 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Priority Matrix · Eisenhower To-Do</title>
-<meta name="description" content="A minimalist to-do list organised by the Eisenhower matrix — sort tasks by importance and urgency. No login, saved locally in your browser." />
+<title>Priority Matrix — Eisenhower Matrix To-Do List</title>
+<meta name="description" content="A free to-do app that sorts your tasks by importance and urgency with the Eisenhower matrix: Do First, Schedule, Delegate, Eliminate. No login — saved in your browser." />
+<meta name="keywords" content="Eisenhower matrix, priority matrix, to-do list, task management, productivity, importance and urgency, do first schedule delegate eliminate, time management" />
+<meta name="author" content="Omer Shubi" />
+<meta name="robots" content="index, follow" />
+<meta name="theme-color" content="#e8f6ff" />
+<meta name="color-scheme" content="light" />
+<link rel="canonical" href="https://omershubi.github.io/priority-matrix/" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Priority Matrix" />
+<meta property="og:title" content="Priority Matrix — Eisenhower Matrix To-Do List" />
+<meta property="og:description" content="Sort your tasks by importance and urgency with the Eisenhower matrix: Do First, Schedule, Delegate, Eliminate. Free, no login, saved in your browser." />
+<meta property="og:url" content="https://omershubi.github.io/priority-matrix/" />
+<meta property="og:image" content="https://omershubi.github.io/priority-matrix/screenshot.png" />
+<meta property="og:image:width" content="2400" />
+<meta property="og:image:height" content="1544" />
+<meta property="og:image:alt" content="The Priority Matrix app: a 2x2 importance/urgency grid with Do First, Schedule, Delegate, and Eliminate quadrants." />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Priority Matrix — Eisenhower Matrix To-Do List" />
+<meta name="twitter:description" content="Sort your tasks by importance and urgency with the Eisenhower matrix. Free, no login, saved in your browser." />
+<meta name="twitter:image" content="https://omershubi.github.io/priority-matrix/screenshot.png" />
+<meta name="twitter:image:alt" content="The Priority Matrix app — a 2x2 Eisenhower matrix to-do list." />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Priority Matrix",
+  "url": "https://omershubi.github.io/priority-matrix/",
+  "description": "A free to-do app that organises tasks by the Eisenhower method — sort by importance and urgency into Do First, Schedule, Delegate, and Eliminate. No login; data is saved locally in your browser.",
+  "applicationCategory": "ProductivityApplication",
+  "operatingSystem": "Any (modern web browser)",
+  "browserRequirements": "Requires JavaScript",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "Omer Shubi", "url": "https://omershubi.github.io/" },
+  "license": "https://opensource.org/licenses/MIT"
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,11 +68,11 @@
     --shadow:4px 4px 0 var(--ink);
     --shadow-sm:3px 3px 0 var(--ink);
 
-    /* quadrant accents, borrowed from the reference palette */
-    --q1:#f6a89e; --q1-tint:#fff0ee;   /* urgent + important  → do first  */
-    --q2:#f5d99e; --q2-tint:#fff6e2;   /* important, not urgent → schedule */
-    --q3:#ffd6e9; --q3-tint:#feeff6;   /* urgent, not important → delegate */
-    --q4:#8cd4cb; --q4-tint:#e6f7f4;   /* neither             → eliminate  */
+    /* four clearly distinct quadrant hues: red, gold, violet, teal */
+    --q1:#f5877a; --q1-tint:#ffe4df;   /* urgent + important  → do first  (coral-red) */
+    --q2:#f4c95d; --q2-tint:#fdf0c9;   /* important, not urgent → schedule (golden amber) */
+    --q3:#b79bf0; --q3-tint:#ebe3fc;   /* urgent, not important → delegate (violet) */
+    --q4:#5fcbb9; --q4-tint:#d4f3ec;   /* neither             → eliminate (teal) */
   }
 
   *{ box-sizing:border-box; }
@@ -97,7 +139,7 @@
   .menu-sep{ height:2px; background:rgba(51,50,46,.12); margin:5px 6px; border-radius:2px; }
 
   /* ---------- matrix board ---------- */
-  .board{ display:grid; grid-template-columns:44px 1fr 1fr; grid-template-rows:34px 1fr 1fr; gap:16px; }
+  .board{ display:grid; grid-template-columns:44px 1fr 1fr; grid-template-rows:34px 1fr 1fr; gap:22px; margin-top:32px; }
   .corner{}
   .col-head, .row-head{ display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
   .row-head{ writing-mode:vertical-rl; transform:rotate(180deg); }
@@ -169,7 +211,7 @@
 
   /* ---------- responsive ---------- */
   @media (max-width:820px){
-    .board{ grid-template-columns:1fr; grid-template-rows:none; gap:14px; }
+    .board{ grid-template-columns:1fr; grid-template-rows:none; gap:16px; margin-top:24px; }
     .corner, .col-head, .row-head{ display:none; }
     .quad{ min-height:auto; }
     .app-title{ font-size:28px; }

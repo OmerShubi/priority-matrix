@@ -19,10 +19,9 @@ No account, no server, no build step — a single self-contained HTML file. Your
 
 - **Add tasks inline** — every quadrant has its own input, so tasks land straight where they belong.
 - **Drag & drop** tasks between quadrants to re-prioritise — changes are saved automatically.
-- Mark done / undo, **double-click to edit**, and delete.
-- Live stats: active / done counts and a completion progress bar.
-- **Hide completed**, clear completed, and reset.
-- **Export / import** your list as JSON (imports append to the current list).
+- Mark done / undo, **double-click to edit**, and delete — with a satisfying flatten-on-hover.
+- A live completion bar in the header tracks your progress at a glance.
+- A compact **⋯ menu** for hide/show completed, clear completed, reset, and JSON **export / import** (imports append to your list).
 - Fully responsive — the 2×2 grid stacks into a single column on mobile.
 - Everything is stored in `localStorage`; nothing ever leaves your browser.
 
