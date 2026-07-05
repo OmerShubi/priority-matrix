@@ -1,4 +1,11 @@
 <!doctype html>
+<!--
+  Priority Matrix — an Eisenhower-matrix to-do list.
+  Copyright (c) 2026 Omer Shubi. Released under the MIT License.
+  Visual design and some CSS (dotted background, card shadows, flatten-on-hover)
+  are adapted from uiineed-todo-list (MIT, Copyright (c) 2025 Ricocc):
+  https://github.com/ricocc/uiineed-todo-list — see THIRD_PARTY_NOTICES.md
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -11,7 +18,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#fff7dc;
+    --bg:#e8f6ff;
     --ink:#33322e;
     --card:#ffffff;
     --muted:rgba(51,50,46,.55);
@@ -36,9 +43,12 @@
     min-height:100vh;
     line-height:1.4;
   }
+  /* soft light-blue page with a whisper of warm cream + dots (à la uiineed-todo-list) */
   .bg-pattern{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='2' cy='2' r='1.3' fill='%23828d99' fill-opacity='0.18'/%3E%3C/svg%3E");
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.09;
+    background-color:#fff7dc;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Cdefs%3E%3Cpattern id='p' width='100' height='100' patternUnits='userSpaceOnUse' patternTransform='scale(0.25)'%3E%3Ccircle fill='none' stroke='%23828D99' stroke-width='25' cx='50' cy='50' r='.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23p)' width='100%25' height='100%25'/%3E%3C/svg%3E");
+    background-size:cover; background-position:center; background-repeat:repeat;
   }
   .wrap{ position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:34px 22px 60px; }
 
@@ -61,13 +71,15 @@
     font:inherit; font-weight:700; cursor:pointer; white-space:nowrap;
     border:2px solid var(--ink); border-radius:11px; background:var(--card); color:var(--ink);
     padding:11px 18px; box-shadow:var(--shadow-sm);
-    transition:transform .08s ease, box-shadow .08s ease;
+    transition:transform .16s ease, box-shadow .16s ease;
   }
   .btn:hover{ transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink); }
   .btn:active{ transform:translate(0,0); box-shadow:1px 1px 0 var(--ink); }
   .btn.small{ padding:8px 12px; font-size:13.5px; border-radius:9px; box-shadow:2px 2px 0 var(--ink); }
   .btn.small:hover{ box-shadow:4px 4px 0 var(--ink); }
   .icon-btn{ font-size:20px; line-height:1; padding:5px 13px; letter-spacing:1px; }
+  .gh-link{ display:inline-flex; align-items:center; justify-content:center; padding:7px 10px; color:var(--ink); text-decoration:none; }
+  .gh-link svg{ display:block; }
 
   .menu-wrap{ position:relative; }
   .menu-pop{ position:absolute; right:0; top:calc(100% + 8px); z-index:30; width:210px;
@@ -121,10 +133,12 @@
 
   /* ---------- task rows ---------- */
   .task{ display:flex; align-items:center; gap:10px; padding:9px 10px;
-    background:var(--card); border:2px solid var(--ink); border-radius:10px; box-shadow:2px 2px 0 var(--ink);
-    cursor:grab; animation:popIn .18s ease; }
+    background:var(--card); border:2px solid var(--ink); border-radius:10px; box-shadow:var(--shadow-sm);
+    cursor:grab; transition:box-shadow .28s ease, transform .28s ease, background .18s ease; }
+  .task.is-new{ animation:popIn .18s ease; }
+  .task:hover{ box-shadow:none; }        /* flatten onto the page, like the original */
   .task:active{ cursor:grabbing; }
-  .task.dragging{ opacity:.35; }
+  .task.dragging{ opacity:.35; box-shadow:none; }
   @keyframes popIn{ from{ opacity:0; transform:scale(.96) translateY(4px); } to{ opacity:1; transform:none; } }
 
   .check{ flex:none; width:23px; height:23px; padding:0; cursor:pointer;
@@ -177,6 +191,9 @@
             <span class="progress"><span id="bar-fill" class="bar-fill"></span></span>
             <span id="bar-label" class="bar-label">No tasks yet</span>
           </div>
+          <a class="btn small gh-link" href="https://github.com/OmerShubi/priority-matrix" target="_blank" rel="noopener" aria-label="View source on GitHub" title="View source on GitHub">
+            <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.02-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          </a>
           <div class="menu-wrap">
             <button id="menu-btn" class="btn small icon-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu" title="More actions">⋯</button>
             <div id="menu-pop" class="menu-pop" role="menu" hidden>
@@ -255,7 +272,7 @@
 
     <footer class="foot">
       <p class="foot-hint">Add a task in any quadrant, then drag cards between quadrants to re-prioritise.</p>
-      <p class="foot-meta">Saved locally in your browser · Inspired by <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">uiineed-todo-list</a></p>
+      <p class="foot-meta">Built by <a href="https://omershubi.github.io/" target="_blank" rel="noopener">Omer Shubi</a> · saved locally in your browser · inspired by <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">uiineed-todo-list</a></p>
     </footer>
   </div>
 
@@ -282,6 +299,7 @@
 
   var state = loadState();
   var uid = state.tasks.reduce(function(m,t){ return Math.max(m, t.id); }, 0) + 1;
+  var newTaskId = null;   // only the just-added task plays the pop-in animation
 
   /* ---------- persistence ---------- */
   function loadState(){
@@ -331,13 +349,14 @@
         items.forEach(function(t){ body.appendChild(taskEl(t)); });
       }
     });
+    newTaskId = null;   // clear so unrelated re-renders don't re-animate
     updateStats();
     save();
   }
 
   function taskEl(t){
     var li = document.createElement("li");
-    li.className = "task" + (t.done ? " done" : "");
+    li.className = "task" + (t.done ? " done" : "") + (t.id === newTaskId ? " is-new" : "");
     li.draggable = true;
     li.dataset.id = t.id;
 
@@ -377,7 +396,9 @@
   function addTask(quadrant, inputEl){
     var v = inputEl.value.trim();
     if(!v) return;
-    state.tasks.push({ id: uid++, text: v, quadrant: quadrant, done:false, createdAt: Date.now() });
+    var id = uid++;
+    state.tasks.push({ id: id, text: v, quadrant: quadrant, done:false, createdAt: Date.now() });
+    newTaskId = id;
     inputEl.value = "";
     render();
     inputEl.focus();

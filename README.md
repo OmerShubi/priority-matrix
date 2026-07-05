@@ -38,8 +38,10 @@ Vanilla HTML, CSS, and JavaScript in one file. No frameworks, no dependencies, n
 
 ## Credits
 
-Design and interaction language inspired by the lovely [uiineed-todo-list](https://github.com/ricocc/uiineed-todo-list) by [ricocc](https://github.com/ricocc), reimagined around the Eisenhower matrix.
+Built by [Omer Shubi](https://omershubi.github.io/).
+
+The visual design and some CSS — the dotted background, the neo-brutalist card shadows, and the flatten-on-hover interaction — are adapted from the lovely [uiineed-todo-list](https://github.com/ricocc/uiineed-todo-list) by [ricocc](https://github.com/ricocc) (MIT licensed), reimagined around the Eisenhower matrix. Their copyright notice is preserved in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## License
 
-[MIT](LICENSE) © 2026 Omer Shubi
+This project is [MIT](LICENSE) © 2026 Omer Shubi. It incorporates MIT-licensed material from uiineed-todo-list (© 2025 Ricocc); see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
