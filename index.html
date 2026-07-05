@@ -50,28 +50,12 @@
   .tagline{ margin:8px 2px 20px; color:var(--muted); font-size:15px; font-weight:500; }
   .tagline b{ color:var(--ink); }
 
-  .card{ background:var(--card); border:2px solid var(--ink); border-radius:var(--radius); box-shadow:var(--shadow); }
-  .add-bar{ padding:16px 16px 14px; margin-bottom:26px; }
-
-  .pills{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-  .pills-label{ font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-right:2px; }
-  .pill{
-    font:inherit; font-weight:700; font-size:13.5px; cursor:pointer;
-    border:2px solid var(--ink); border-radius:20px; padding:6px 13px; background:var(--card);
-    color:var(--ink); opacity:.72; transition:transform .08s ease, box-shadow .08s ease, opacity .08s ease;
-  }
-  .pill:hover{ opacity:1; transform:translateY(-1px); }
-  .pill.active{ opacity:1; box-shadow:var(--shadow-sm); }
-  .pill.q1.active{ background:var(--q1-tint); } .pill.q2.active{ background:var(--q2-tint); }
-  .pill.q3.active{ background:var(--q3-tint); } .pill.q4.active{ background:var(--q4-tint); }
-
-  .add-row{ display:flex; gap:10px; }
-  #new-task{
-    flex:1; min-width:0; font:inherit; font-size:16px; font-weight:500; color:var(--ink);
-    border:2px solid var(--ink); border-radius:11px; padding:12px 14px; background:var(--card); outline:none;
-  }
-  #new-task::placeholder{ color:rgba(51,50,46,.5); font-weight:500; }
-  #new-task:focus{ box-shadow:var(--shadow-sm); }
+  /* ---------- header menu (small, to the side) ---------- */
+  .menu{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .mini-stats{ display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; color:var(--muted); }
+  .progress{ width:96px; height:12px; border:2px solid var(--ink); border-radius:8px; background:var(--card); overflow:hidden; }
+  .bar-fill{ height:100%; width:0%; background:var(--q4); border-right:2px solid var(--ink); transition:width .25s ease; }
+  .bar-label{ font-size:13px; white-space:nowrap; }
 
   .btn{
     font:inherit; font-weight:700; cursor:pointer; white-space:nowrap;
@@ -81,19 +65,24 @@
   }
   .btn:hover{ transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--ink); }
   .btn:active{ transform:translate(0,0); box-shadow:1px 1px 0 var(--ink); }
-  .btn.primary{ background:var(--q3); }
   .btn.small{ padding:8px 12px; font-size:13.5px; border-radius:9px; box-shadow:2px 2px 0 var(--ink); }
   .btn.small:hover{ box-shadow:4px 4px 0 var(--ink); }
-  .btn.small.active{ background:var(--q2); }
-  .btn.small.danger:hover{ background:var(--q1); }
+  .icon-btn{ font-size:20px; line-height:1; padding:5px 13px; letter-spacing:1px; }
 
-  .toolbar{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:16px; padding-top:14px; border-top:2px dashed rgba(51,50,46,.25); }
-  .stats{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:14px; font-weight:600; color:var(--muted); }
-  .stats b{ color:var(--ink); font-size:16px; }
-  .progress{ width:120px; height:12px; border:2px solid var(--ink); border-radius:8px; background:var(--card); overflow:hidden; }
-  .bar-fill{ height:100%; width:0%; background:var(--q4); border-right:2px solid var(--ink); transition:width .25s ease; }
-  .bar-label{ font-size:13px; }
-  .actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .menu-wrap{ position:relative; }
+  .menu-pop{ position:absolute; right:0; top:calc(100% + 8px); z-index:30; width:210px;
+    background:var(--card); border:2px solid var(--ink); border-radius:12px; box-shadow:var(--shadow);
+    padding:6px; display:flex; flex-direction:column; animation:popIn .14s ease; }
+  .menu-pop[hidden]{ display:none; }
+  .menu-blurb{ margin:0; padding:9px 11px 10px; font-size:12.5px; font-weight:600; line-height:1.45; color:var(--muted); }
+  .menu-blurb b{ color:var(--ink); font-weight:800; }
+  .menu-item{ font:inherit; font-weight:700; font-size:14px; text-align:left; cursor:pointer;
+    border:none; background:transparent; color:var(--ink); border-radius:8px; padding:9px 11px; }
+  .menu-item:hover{ background:var(--q2-tint); }
+  .menu-item.active{ background:var(--q2); }
+  .menu-item.danger{ color:#b23b2e; }
+  .menu-item.danger:hover{ background:var(--q1-tint); }
+  .menu-sep{ height:2px; background:rgba(51,50,46,.12); margin:5px 6px; border-radius:2px; }
 
   /* ---------- matrix board ---------- */
   .board{ display:grid; grid-template-columns:44px 1fr 1fr; grid-template-rows:34px 1fr 1fr; gap:16px; }
@@ -120,6 +109,15 @@
   .quad.drag-over{ box-shadow:6px 6px 0 var(--ink); }
 
   .hint{ margin:auto; text-align:center; color:var(--muted); font-size:13px; font-weight:600; max-width:80%; padding:10px; }
+
+  /* ---------- inline add, one per quadrant ---------- */
+  .quad-add{ display:flex; align-items:center; gap:8px; flex:none; padding:9px 11px; border-top:2px dashed rgba(51,50,46,.18); }
+  .quad-add-icon{ flex:none; width:22px; height:22px; display:grid; place-items:center; font-size:17px; font-weight:800; color:var(--muted); transition:color .1s ease; }
+  .quad-input{ flex:1; min-width:0; font:inherit; font-size:14px; font-weight:600; color:var(--ink);
+    border:2px solid transparent; border-radius:8px; padding:6px 8px; background:transparent; outline:none; }
+  .quad-input::placeholder{ color:rgba(51,50,46,.45); font-weight:600; }
+  .quad-input:focus{ border-color:var(--ink); background:var(--card); box-shadow:2px 2px 0 var(--ink); }
+  .quad-add:focus-within .quad-add-icon{ color:var(--ink); }
 
   /* ---------- task rows ---------- */
   .task{ display:flex; align-items:center; gap:10px; padding:9px 10px;
@@ -148,6 +146,8 @@
 
   /* ---------- footer ---------- */
   .foot{ margin-top:30px; text-align:center; color:var(--muted); font-size:13px; font-weight:600; }
+  .foot-hint{ margin:0 0 7px; }
+  .foot-meta{ margin:0; font-size:12px; }
   .foot a{ color:var(--ink); text-decoration:none; border-bottom:2px solid rgba(51,50,46,.3); }
   .foot a:hover{ border-bottom-color:var(--ink); }
 
@@ -159,11 +159,9 @@
     .corner, .col-head, .row-head{ display:none; }
     .quad{ min-height:auto; }
     .app-title{ font-size:28px; }
-    .toolbar{ justify-content:flex-start; }
   }
-  @media (max-width:480px){
-    .add-row{ flex-direction:column; align-items:stretch; }
-    #add-btn{ width:100%; }
+  @media (max-width:560px){
+    .menu{ width:100%; justify-content:space-between; }
   }
 </style>
 </head>
@@ -174,34 +172,24 @@
     <header>
       <div class="titlebar">
         <h1 class="app-title"><span class="wig">🎯</span> Priority Matrix</h1>
-      </div>
-      <p class="tagline">A to-do list split by the Eisenhower method — decide every task by <b>importance</b> and <b>urgency</b>. Drag cards between quadrants to re-prioritise.</p>
-
-      <div class="add-bar card">
-        <div class="pills">
-          <span class="pills-label">Add to</span>
-          <button class="pill q1 active" data-q="1" title="Urgent &amp; important">🔥 Do First</button>
-          <button class="pill q2" data-q="2" title="Important, not urgent">📅 Schedule</button>
-          <button class="pill q3" data-q="3" title="Urgent, not important">🤝 Delegate</button>
-          <button class="pill q4" data-q="4" title="Not urgent or important">🧹 Eliminate</button>
-        </div>
-        <div class="add-row">
-          <input id="new-task" type="text" autocomplete="off" placeholder="What needs doing? Press Enter to add…" />
-          <button id="add-btn" class="btn primary">Add</button>
-        </div>
-        <div class="toolbar">
-          <div class="stats">
-            <span class="stat"><b id="stat-active">0</b> active</span>
-            <span class="stat"><b id="stat-done">0</b> done</span>
+        <div class="menu">
+          <div class="mini-stats" title="Completion">
             <span class="progress"><span id="bar-fill" class="bar-fill"></span></span>
             <span id="bar-label" class="bar-label">No tasks yet</span>
           </div>
-          <div class="actions">
-            <button id="toggle-done" class="btn small">Hide done</button>
-            <button id="clear-done" class="btn small">Clear done</button>
-            <button id="export" class="btn small">Export</button>
-            <button id="import" class="btn small">Import</button>
-            <button id="reset" class="btn small danger">Reset</button>
+          <div class="menu-wrap">
+            <button id="menu-btn" class="btn small icon-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu" title="More actions">⋯</button>
+            <div id="menu-pop" class="menu-pop" role="menu" hidden>
+              <p class="menu-blurb">Sort tasks by <b>importance</b> and <b>urgency</b> — the Eisenhower method.</p>
+              <div class="menu-sep"></div>
+              <button id="toggle-done" class="menu-item" role="menuitem">Hide done</button>
+              <button id="clear-done" class="menu-item" role="menuitem">Clear completed</button>
+              <div class="menu-sep"></div>
+              <button id="export" class="menu-item" role="menuitem">Export JSON</button>
+              <button id="import" class="menu-item" role="menuitem">Import JSON</button>
+              <div class="menu-sep"></div>
+              <button id="reset" class="menu-item danger" role="menuitem">Reset all</button>
+            </div>
           </div>
         </div>
       </div>
@@ -220,6 +208,10 @@
           <span class="count">0</span>
         </header>
         <ul class="quad-body"></ul>
+        <div class="quad-add">
+          <span class="quad-add-icon" aria-hidden="true">＋</span>
+          <input class="quad-input" type="text" autocomplete="off" placeholder="Add to Do First…" aria-label="Add a task to Do First" />
+        </div>
       </section>
       <section class="quad q2" data-q="2">
         <header class="quad-head">
@@ -228,6 +220,10 @@
           <span class="count">0</span>
         </header>
         <ul class="quad-body"></ul>
+        <div class="quad-add">
+          <span class="quad-add-icon" aria-hidden="true">＋</span>
+          <input class="quad-input" type="text" autocomplete="off" placeholder="Add to Schedule…" aria-label="Add a task to Schedule" />
+        </div>
       </section>
 
       <div class="row-head"><span>Not important</span></div>
@@ -238,6 +234,10 @@
           <span class="count">0</span>
         </header>
         <ul class="quad-body"></ul>
+        <div class="quad-add">
+          <span class="quad-add-icon" aria-hidden="true">＋</span>
+          <input class="quad-input" type="text" autocomplete="off" placeholder="Add to Delegate…" aria-label="Add a task to Delegate" />
+        </div>
       </section>
       <section class="quad q4" data-q="4">
         <header class="quad-head">
@@ -246,12 +246,16 @@
           <span class="count">0</span>
         </header>
         <ul class="quad-body"></ul>
+        <div class="quad-add">
+          <span class="quad-add-icon" aria-hidden="true">＋</span>
+          <input class="quad-input" type="text" autocomplete="off" placeholder="Add to Eliminate…" aria-label="Add a task to Eliminate" />
+        </div>
       </section>
     </main>
 
     <footer class="foot">
-      Everything is saved locally in your browser — no account, no server.
-      Inspired by <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">uiineed-todo-list</a>.
+      <p class="foot-hint">Add a task in any quadrant, then drag cards between quadrants to re-prioritise.</p>
+      <p class="foot-meta">Saved locally in your browser · Inspired by <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">uiineed-todo-list</a></p>
     </footer>
   </div>
 
@@ -272,12 +276,12 @@
 
   var $ = function(s){ return document.querySelector(s); };
   var board = $("#board");
-  var input = $("#new-task");
   var fileInput = $("#import-file");
+  var barFill = $("#bar-fill");
+  var barLabel = $("#bar-label");
 
   var state = loadState();
   var uid = state.tasks.reduce(function(m,t){ return Math.max(m, t.id); }, 0) + 1;
-  var selectedQuad = 1;
 
   /* ---------- persistence ---------- */
   function loadState(){
@@ -365,20 +369,18 @@
     var total = state.tasks.length;
     var done = state.tasks.filter(function(t){ return t.done; }).length;
     var pct = total ? Math.round(done / total * 100) : 0;
-    $("#stat-active").textContent = total - done;
-    $("#stat-done").textContent = done;
-    $("#bar-fill").style.width = pct + "%";
-    $("#bar-label").textContent = total ? (done + "/" + total + " done · " + pct + "%") : "No tasks yet";
+    barFill.style.width = pct + "%";
+    barLabel.textContent = total ? (done + "/" + total + " done · " + pct + "%") : "No tasks yet";
   }
 
   /* ---------- mutations ---------- */
-  function addTask(){
-    var v = input.value.trim();
+  function addTask(quadrant, inputEl){
+    var v = inputEl.value.trim();
     if(!v) return;
-    state.tasks.push({ id: uid++, text: v, quadrant: selectedQuad, done:false, createdAt: Date.now() });
-    input.value = "";
+    state.tasks.push({ id: uid++, text: v, quadrant: quadrant, done:false, createdAt: Date.now() });
+    inputEl.value = "";
     render();
-    input.focus();
+    inputEl.focus();
   }
   function toggleDone(id){
     var t = find(id);
@@ -503,17 +505,32 @@
     render();
   }
 
-  /* ---------- toolbar ---------- */
-  document.querySelectorAll(".pill").forEach(function(p){
-    p.addEventListener("click", function(){
-      selectedQuad = Number(p.dataset.q);
-      document.querySelectorAll(".pill").forEach(function(x){ x.classList.toggle("active", x === p); });
-      input.focus();
+  /* ---------- inline add (one input per quadrant) ---------- */
+  board.querySelectorAll(".quad-input").forEach(function(inp){
+    inp.addEventListener("keydown", function(e){
+      if(e.key === "Enter"){
+        e.preventDefault();
+        addTask(Number(inp.closest(".quad").dataset.q), inp);
+      }
     });
   });
 
-  $("#add-btn").addEventListener("click", addTask);
-  input.addEventListener("keydown", function(e){ if(e.key === "Enter") addTask(); });
+  /* ---------- menu (small, to the side) ---------- */
+  var menuBtn = $("#menu-btn");
+  var menuPop = $("#menu-pop");
+  function openMenu(open){
+    menuPop.hidden = !open;
+    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  menuBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    openMenu(menuPop.hidden);
+  });
+  menuPop.addEventListener("click", function(e){ if(e.target.closest(".menu-item")) openMenu(false); });
+  document.addEventListener("click", function(e){
+    if(!menuPop.hidden && !menuPop.contains(e.target) && e.target !== menuBtn){ openMenu(false); }
+  });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") openMenu(false); });
 
   var toggleBtn = $("#toggle-done");
   toggleBtn.addEventListener("click", function(){
@@ -586,19 +603,9 @@
     reader.readAsText(file);
   });
 
-  /* ---------- responsive placeholder ---------- */
-  var phMq = window.matchMedia("(max-width: 520px)");
-  function setPlaceholder(){
-    input.placeholder = phMq.matches ? "Add a task…" : "What needs doing? Press Enter to add…";
-  }
-  setPlaceholder();
-  if(phMq.addEventListener) phMq.addEventListener("change", setPlaceholder);
-  else if(phMq.addListener) phMq.addListener(setPlaceholder);
-
   /* ---------- go ---------- */
   syncToggleLabel();
   render();
-  input.focus();
 })();
 </script>
 </body>

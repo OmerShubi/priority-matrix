@@ -17,8 +17,8 @@ No account, no server, no build step — a single self-contained HTML file. Your
 
 ## Features
 
+- **Add tasks inline** — every quadrant has its own input, so tasks land straight where they belong.
 - **Drag & drop** tasks between quadrants to re-prioritise — changes are saved automatically.
-- Add tasks straight into any quadrant (or drag them later).
 - Mark done / undo, **double-click to edit**, and delete.
 - Live stats: active / done counts and a completion progress bar.
 - **Hide completed**, clear completed, and reset.
