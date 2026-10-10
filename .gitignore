@@ -4,3 +4,5 @@
 # Editor
 .vscode/
 .idea/
+.firebase/
+firebase-debug.log

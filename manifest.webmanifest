@@ -1,0 +1,14 @@
+{
+  "name": "Priority Matrix",
+  "short_name": "Priorities",
+  "description": "An Eisenhower-matrix to-do list: Do First, Schedule, Delegate, Eliminate.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e8f6ff",
+  "theme_color": "#e8f6ff",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

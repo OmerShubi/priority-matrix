@@ -55,6 +55,10 @@
 }
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AF%3C/text%3E%3C/svg%3E" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Priority Matrix" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet" />
@@ -121,6 +125,16 @@
     font-size:13.5px; border-radius:9px; box-shadow:2px 2px 0 var(--ink); }
   .btn.small:hover{ box-shadow:4px 4px 0 var(--ink); }
   .icon-btn{ font-size:20px; line-height:1; letter-spacing:1px; }
+  .btn[hidden]{ display:none; }
+
+  /* ---------- sync button + status dot ---------- */
+  .sync-btn{ gap:7px; }
+  .sync-dot{ width:9px; height:9px; flex:none; border-radius:50%; border:2px solid var(--ink); background:var(--card); }
+  .sync-dot[data-status="synced"]{ background:var(--q4); }
+  .sync-dot[data-status="syncing"]{ background:var(--q2); }
+  .sync-dot[data-status="error"]{ background:var(--q1); }
+  .sync-status{ display:flex; align-items:center; gap:8px; margin:0 0 18px; font-size:13.5px; font-weight:700; color:var(--muted); }
+  .sync-actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
   .menu-wrap{ position:relative; }
   .menu-pop{ position:absolute; right:0; top:calc(100% + 8px); z-index:30; width:210px;
@@ -241,6 +255,9 @@
   }
   @media (max-width:560px){
     .menu{ width:100%; justify-content:space-between; }
+    /* with the extra Sync button: progress on its own row, buttons right-aligned below */
+    .menu:has(#sync-btn:not([hidden])){ justify-content:flex-end; }
+    .menu:has(#sync-btn:not([hidden])) .mini-stats{ flex:1 0 100%; }
   }
 </style>
 </head>
@@ -256,6 +273,7 @@
             <span class="progress"><span id="bar-fill" class="bar-fill"></span></span>
             <span id="bar-label" class="bar-label">No tasks yet</span>
           </div>
+          <button id="sync-btn" class="btn small sync-btn" aria-haspopup="dialog" aria-expanded="false" hidden><span class="sync-dot" id="sync-dot"></span><span id="sync-btn-label">Sign in</span></button>
           <button id="about-btn" class="btn small" aria-haspopup="dialog" aria-expanded="false">About</button>
           <div class="menu-wrap">
             <button id="menu-btn" class="btn small icon-btn" aria-haspopup="true" aria-expanded="false" aria-label="Menu" title="More actions">⋯</button>
@@ -351,7 +369,7 @@
       <p class="about-desc">Sort your tasks by <b>importance</b> and <b>urgency</b> — so you always know what to do first, schedule, delegate, or eliminate.</p>
       <ul class="about-meta">
         <li>By <a href="https://omershubi.github.io/" target="_blank" rel="noopener">Omer Shubi</a>, inspired by <a href="https://github.com/ricocc/uiineed-todo-list" target="_blank" rel="noopener">uiineed-todo-list</a></li>
-        <li>Saved locally in your browser — no account, no server</li>
+        <li id="about-storage">Saved locally in your browser — no account, no server</li>
       </ul>
       <a class="btn small about-repo" href="https://github.com/OmerShubi/priority-matrix" target="_blank" rel="noopener">
         <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.02-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -360,12 +378,47 @@
     </div>
   </div>
 
+  <div class="about-overlay" id="sync-overlay" hidden>
+    <div class="about-card" role="dialog" aria-modal="true" aria-labelledby="sync-title">
+      <button class="about-close" id="sync-close" aria-label="Close">×</button>
+      <div class="about-head">
+        <span class="about-avatar" aria-hidden="true">☁️</span>
+        <div>
+          <h2 id="sync-title">Sync</h2>
+          <p class="about-sub">Your matrix on every device</p>
+        </div>
+      </div>
+      <div id="sync-signed-out">
+        <p class="about-desc">Sign in to back up your tasks and keep them in sync across your phone and computer. Without an account, everything stays in this browser.</p>
+        <div class="sync-actions"><button id="sign-in" class="btn small">Continue with Google</button></div>
+      </div>
+      <div id="sync-signed-in" hidden>
+        <p class="about-desc">Signed in as <b id="sync-email"></b></p>
+        <p class="sync-status"><span class="sync-dot" id="sync-dot-big"></span><span id="sync-status-text"></span></p>
+        <div class="sync-actions"><button id="sign-out" class="btn small">Sign out</button></div>
+      </div>
+    </div>
+  </div>
+
 <script>
 (function(){
   "use strict";
 
+  /* ---------- Firebase config (optional login + sync) ----------
+     Paste your web app config from the Firebase console here
+     (Project settings → Your apps → SDK setup). Until you do, the app
+     runs in local-only mode and hides all sync UI. See README. */
+  var FIREBASE_CONFIG = {
+    apiKey: "PASTE_YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    appId: "PASTE_YOUR_APP_ID"
+  };
+  var CLOUD_ENABLED = !/PASTE/.test(FIREBASE_CONFIG.apiKey);
+
   var KEY = "todo-matrix.v1";
   var QUADS = [1,2,3,4];
+  var TOMBSTONE_TTL = 90 * 864e5;   // remember deletions for 90 days
   var HINTS = {
     1:"Crises, deadlines, blockers — tackle these now.",
     2:"Goals, planning, deep work — carve out time.",
@@ -380,46 +433,98 @@
   var barLabel = $("#bar-label");
 
   var state = loadState();
-  var uid = state.tasks.reduce(function(m,t){ return Math.max(m, t.id); }, 0) + 1;
   var newTaskId = null;   // only the just-added task plays the pop-in animation
 
   /* ---------- persistence ---------- */
+  // Task ids are random strings so tasks made on different devices never collide.
+  function newId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+
   function loadState(){
     try{
       var raw = JSON.parse(localStorage.getItem(KEY));
       if(raw && Array.isArray(raw.tasks)){
-        return { tasks: raw.tasks.map(normalize), hideCompleted: !!raw.hideCompleted };
+        return { tasks: raw.tasks.map(normalize), deleted: raw.deleted || {}, hideCompleted: !!raw.hideCompleted };
       }
     }catch(e){}
-    return { tasks: seed(), hideCompleted:false };
+    return { tasks: seed(), deleted: {}, hideCompleted:false };
   }
-  function normalize(t){
+  function normalize(t, i){
     return {
-      id: Number(t.id),
+      // older versions used 1, 2, 3… — not unique across devices, so re-id them
+      id: typeof t.id === "string" && t.id ? t.id : newId(),
       text: String(t.text || ""),
       quadrant: QUADS.indexOf(t.quadrant) >= 0 ? t.quadrant : 1,
       done: !!t.done,
-      createdAt: t.createdAt || Date.now()
+      createdAt: t.createdAt || Date.now(),
+      updatedAt: t.updatedAt || t.createdAt || 0,
+      order: typeof t.order === "number" ? t.order : (i || 0)
     };
   }
   function seed(){
+    // fixed ids + updatedAt 0, so every device's sample tasks are the same tasks
+    // and any real edit or delete wins when syncing
     var now = Date.now();
     return [
-      { id:1, text:"Fix the checkout bug before launch", quadrant:1, done:false, createdAt:now },
-      { id:2, text:"Draft next quarter's roadmap",        quadrant:2, done:false, createdAt:now },
-      { id:3, text:"Reply to routine emails",             quadrant:3, done:false, createdAt:now },
-      { id:4, text:"Endless social-media scrolling",      quadrant:4, done:false, createdAt:now }
+      { id:"seed-1", text:"Fix the checkout bug before launch", quadrant:1, done:false, createdAt:now, updatedAt:0, order:0 },
+      { id:"seed-2", text:"Draft next quarter's roadmap",        quadrant:2, done:false, createdAt:now, updatedAt:0, order:0 },
+      { id:"seed-3", text:"Reply to routine emails",             quadrant:3, done:false, createdAt:now, updatedAt:0, order:0 },
+      { id:"seed-4", text:"Endless social-media scrolling",      quadrant:4, done:false, createdAt:now, updatedAt:0, order:0 }
     ];
   }
-  function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  // Every change goes through here: save locally, queue a cloud write, redraw.
+  function commit(){
+    save();
+    if(CLOUD_ENABLED) cloud.push();
+    render();
+  }
+
+  /* ---------- merge (cloud sync) ----------
+     Each task keeps whichever copy was edited last. Deletions are kept as
+     tombstones (id → time) so one device's stale copy can't bring a task back. */
+  function mergeStates(a, b){
+    var deleted = {}, byId = {};
+    [a.deleted, b.deleted].forEach(function(d){
+      Object.keys(d || {}).forEach(function(id){ deleted[id] = Math.max(deleted[id] || 0, d[id] || 0); });
+    });
+    a.tasks.concat(b.tasks).forEach(function(t){
+      var cur = byId[t.id];
+      if(!cur || t.updatedAt > cur.updatedAt) byId[t.id] = t;
+    });
+    var tasks = Object.keys(byId).map(function(id){ return byId[id]; })
+      .filter(function(t){ return !(deleted[t.id] >= t.updatedAt); })
+      .sort(byOrder);
+    var cutoff = Date.now() - TOMBSTONE_TTL;
+    Object.keys(deleted).forEach(function(id){ if(deleted[id] < cutoff) delete deleted[id]; });
+    return { tasks: tasks, deleted: deleted };
+  }
+  function byOrder(x, y){ return x.order - y.order || x.createdAt - y.createdAt || (x.id < y.id ? -1 : 1); }
+  // What gets stored in the cloud (hide/show done stays per-device).
+  function cloudDoc(s){
+    return { tasks: s.tasks.map(function(t){ return normalize(t); }), deleted: s.deleted };
+  }
+  function sameContent(a, b){
+    function key(s){
+      var tasks = s.tasks.map(function(t){ return [t.id, t.text, t.quadrant, t.done, t.createdAt, t.updatedAt, t.order]; })
+        .sort(function(x, y){ return x[0] < y[0] ? -1 : 1; });
+      var del = Object.keys(s.deleted).sort().map(function(id){ return [id, s.deleted[id]]; });
+      return JSON.stringify([tasks, del]);
+    }
+    return key(a) === key(b);
+  }
+  function tombstone(id){ state.deleted[id] = Date.now(); }
 
   /* ---------- render ---------- */
+  function tasksIn(q){ return state.tasks.filter(function(t){ return t.quadrant === q; }).sort(byOrder); }
+  function nextOrder(q){ return tasksIn(q).reduce(function(m, t){ return Math.max(m, t.order + 1); }, 0); }
+
   function render(){
     document.body.classList.toggle("hide-completed", state.hideCompleted);
     QUADS.forEach(function(q){
       var quad = board.querySelector(".quad.q" + q);
       var body = quad.querySelector(".quad-body");
-      var items = state.tasks.filter(function(t){ return t.quadrant === q; });
+      var items = tasksIn(q);
       quad.querySelector(".count").textContent = items.length;
       body.innerHTML = "";
       if(items.length === 0){
@@ -433,7 +538,7 @@
     });
     newTaskId = null;   // clear so unrelated re-renders don't re-animate
     updateStats();
-    save();
+    flushRemote();
   }
 
   function taskEl(t){
@@ -478,20 +583,21 @@
   function addTask(quadrant, inputEl){
     var v = inputEl.value.trim();
     if(!v) return;
-    var id = uid++;
-    state.tasks.push({ id: id, text: v, quadrant: quadrant, done:false, createdAt: Date.now() });
+    var id = newId(), now = Date.now();
+    state.tasks.push({ id: id, text: v, quadrant: quadrant, done:false, createdAt: now, updatedAt: now, order: nextOrder(quadrant) });
     newTaskId = id;
     inputEl.value = "";
-    render();
+    commit();
     inputEl.focus();
   }
   function toggleDone(id){
     var t = find(id);
-    if(t){ t.done = !t.done; render(); }
+    if(t){ t.done = !t.done; t.updatedAt = Date.now(); commit(); }
   }
   function removeTask(id){
     state.tasks = state.tasks.filter(function(t){ return t.id !== id; });
-    render();
+    tombstone(id);
+    commit();
   }
   function find(id){
     for(var i=0;i<state.tasks.length;i++){ if(state.tasks[i].id === id) return state.tasks[i]; }
@@ -499,8 +605,7 @@
   }
 
   function startEdit(li){
-    var id = Number(li.dataset.id);
-    var t = find(id);
+    var t = find(li.dataset.id);
     if(!t) return;
     li.draggable = false;
     var span = li.querySelector(".task-text");
@@ -511,27 +616,25 @@
     edit.focus();
     edit.select();
     var closed = false;
-    function commit(keep){
+    function finish(keep){
       if(closed) return;
       closed = true;
-      if(keep){
-        var v = edit.value.trim();
-        if(v) t.text = v;
-      }
-      render();
+      var v = edit.value.trim();
+      if(keep && v && v !== t.text){ t.text = v; t.updatedAt = Date.now(); commit(); }
+      else render();
     }
     edit.addEventListener("keydown", function(ev){
-      if(ev.key === "Enter"){ ev.preventDefault(); commit(true); }
-      else if(ev.key === "Escape"){ ev.preventDefault(); commit(false); }
+      if(ev.key === "Enter"){ ev.preventDefault(); finish(true); }
+      else if(ev.key === "Escape"){ ev.preventDefault(); finish(false); }
     });
-    edit.addEventListener("blur", function(){ commit(true); });
+    edit.addEventListener("blur", function(){ finish(true); });
   }
 
   /* ---------- click / edit delegation ---------- */
   board.addEventListener("click", function(e){
     var li = e.target.closest(".task");
     if(!li) return;
-    var id = Number(li.dataset.id);
+    var id = li.dataset.id;
     if(e.target.closest(".check")) toggleDone(id);
     else if(e.target.closest(".del")) removeTask(id);
   });
@@ -552,6 +655,7 @@
     var d = board.querySelector(".task.dragging");
     if(d) d.classList.remove("dragging");
     board.querySelectorAll(".quad.drag-over").forEach(function(q){ q.classList.remove("drag-over"); });
+    flushRemote();
   });
 
   function getDragAfterElement(container, y){
@@ -590,22 +694,19 @@
     });
   });
 
-  // Rebuild the model's order + quadrant assignment from the current DOM,
-  // keeping every task's own data (text/done/createdAt).
+  // Read each task's quadrant + position back from the DOM. Only tasks that
+  // actually moved get a new timestamp, so a drag doesn't clobber edits made
+  // to other tasks on another device.
   function syncFromDOM(){
-    var byId = {};
-    state.tasks.forEach(function(t){ byId[t.id] = t; });
-    var next = [];
+    var now = Date.now();
     QUADS.forEach(function(q){
       var body = board.querySelector(".quad.q" + q + " .quad-body");
-      body.querySelectorAll(".task").forEach(function(li){
-        var t = byId[li.dataset.id];
-        if(t){ t.quadrant = q; next.push(t); delete byId[li.dataset.id]; }
+      body.querySelectorAll(".task").forEach(function(li, i){
+        var t = find(li.dataset.id);
+        if(t && (t.quadrant !== q || t.order !== i)){ t.quadrant = q; t.order = i; t.updatedAt = now; }
       });
     });
-    Object.keys(byId).forEach(function(k){ next.push(byId[k]); }); // safety net
-    state.tasks = next;
-    render();
+    commit();
   }
 
   /* ---------- inline add (one input per quadrant) ---------- */
@@ -633,7 +734,7 @@
   document.addEventListener("click", function(e){
     if(!menuPop.hidden && !menuPop.contains(e.target) && e.target !== menuBtn){ openMenu(false); }
   });
-  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ openMenu(false); openAbout(false); } });
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape"){ openMenu(false); openAbout(false); openSync(false); } });
 
   /* ---------- about dialog ---------- */
   var aboutBtn = $("#about-btn");
@@ -651,6 +752,7 @@
   toggleBtn.addEventListener("click", function(){
     state.hideCompleted = !state.hideCompleted;
     syncToggleLabel();
+    save();
     render();
   });
   function syncToggleLabel(){
@@ -661,16 +763,20 @@
   $("#clear-done").addEventListener("click", function(){
     if(!state.tasks.some(function(t){ return t.done; })) return;
     if(confirm("Remove all completed tasks?")){
-      state.tasks = state.tasks.filter(function(t){ return !t.done; });
-      render();
+      state.tasks = state.tasks.filter(function(t){
+        if(t.done) tombstone(t.id);
+        return !t.done;
+      });
+      commit();
     }
   });
 
   $("#reset").addEventListener("click", function(){
     if(!state.tasks.length) return;
     if(confirm("Delete ALL tasks? This cannot be undone.")){
+      state.tasks.forEach(function(t){ tombstone(t.id); });
       state.tasks = [];
-      render();
+      commit();
     }
   });
 
@@ -695,20 +801,23 @@
         var data = JSON.parse(reader.result);
         var arr = Array.isArray(data) ? data : (data && Array.isArray(data.tasks) ? data.tasks : null);
         if(!arr) throw new Error("bad");
-        var added = 0;
+        var added = 0, now = Date.now();
         arr.forEach(function(t){
           if(t && typeof t.text === "string" && t.text.trim()){
+            var q = QUADS.indexOf(t.quadrant) >= 0 ? t.quadrant : 1;
             state.tasks.push({
-              id: uid++,
+              id: newId(),
               text: t.text,
-              quadrant: QUADS.indexOf(t.quadrant) >= 0 ? t.quadrant : 1,
+              quadrant: q,
               done: !!t.done,
-              createdAt: t.createdAt || Date.now()
+              createdAt: t.createdAt || now,
+              updatedAt: now,
+              order: nextOrder(q)
             });
             added++;
           }
         });
-        render();
+        commit();
         if(!added) alert("No tasks found in that file.");
       }catch(err){
         alert("Could not import — the file isn't valid Priority Matrix JSON.");
@@ -718,9 +827,150 @@
     reader.readAsText(file);
   });
 
+  /* ---------- cloud sync (optional) ---------- */
+  var cloud = {
+    auth: null, db: null, fs: null, authM: null, user: null,
+    ready: false, snapUnsub: null, writeTimer: null,
+
+    init: function(){
+      var self = this;
+      var base = "https://www.gstatic.com/firebasejs/11.6.1/";
+      Promise.all([
+        import(base + "firebase-app.js"),
+        import(base + "firebase-auth.js"),
+        import(base + "firebase-firestore.js")
+      ]).then(function(mods){
+        var app = mods[0].initializeApp(FIREBASE_CONFIG);
+        self.authM = mods[1];
+        self.fs = mods[2];
+        self.auth = self.authM.getAuth(app);
+        self.db = self.fs.getFirestore(app);
+        self.authM.getRedirectResult(self.auth).catch(function(){});
+        self.authM.onAuthStateChanged(self.auth, function(user){
+          self.user = user;
+          self.ready = false;
+          if(self.snapUnsub){ self.snapUnsub(); self.snapUnsub = null; }
+          if(user){
+            setSyncStatus("syncing");
+            var ref = self.fs.doc(self.db, "users", user.uid);
+            self.snapUnsub = self.fs.onSnapshot(ref, function(snap){
+              if(snap.metadata.hasPendingWrites) return;
+              self.ready = true;
+              applyRemote(snap.exists() ? snap.data() : null);
+            }, function(){ setSyncStatus("error"); });
+          } else {
+            setSyncStatus("off");
+          }
+          renderSyncUI();
+        });
+      }).catch(function(){ setSyncStatus("error"); });
+    },
+
+    signIn: function(){
+      if(!this.auth) return;
+      var self = this;
+      var provider = new this.authM.GoogleAuthProvider();
+      this.authM.signInWithPopup(this.auth, provider).catch(function(e){
+        var code = (e && e.code) || "";
+        if(code.indexOf("popup-blocked") >= 0 || code.indexOf("operation-not-supported") >= 0){
+          self.authM.signInWithRedirect(self.auth, provider).catch(function(){});
+        }
+      });
+    },
+
+    signOut: function(){
+      if(this.auth) this.authM.signOut(this.auth).catch(function(){});
+    },
+
+    // Debounced; waits for the first snapshot so we never overwrite cloud
+    // data we haven't merged yet.
+    push: function(){
+      if(!this.user || !this.ready) return;
+      var self = this;
+      clearTimeout(this.writeTimer);
+      this.writeTimer = setTimeout(function(){ self.write(); }, 800);
+    },
+
+    write: function(){
+      var user = this.user;
+      if(!user) return;
+      setSyncStatus("syncing");
+      var doc = cloudDoc(state);
+      doc.updatedAt = Date.now();
+      this.fs.setDoc(this.fs.doc(this.db, "users", user.uid), doc)
+        .then(function(){ setSyncStatus("synced"); })
+        .catch(function(){ setSyncStatus("error"); });
+    }
+  };
+
+  // Merge a cloud snapshot into local; write back only if the merge produced
+  // something the cloud doesn't have yet. Held while an edit or drag is in
+  // progress so a remote change can't yank the task out from under you.
+  var pendingRemote = null;
+  function applyRemote(data){
+    if(board.querySelector(".edit-input, .task.dragging")){ pendingRemote = { data: data }; return; }
+    var remote = data ? { tasks: (data.tasks || []).map(normalize), deleted: data.deleted || {} } : null;
+    if(remote){
+      var merged = mergeStates(state, remote);
+      state.tasks = merged.tasks;
+      state.deleted = merged.deleted;
+      save();
+      render();
+    }
+    if(!remote || !sameContent(state, remote)) cloud.push();
+    else setSyncStatus("synced");
+  }
+  function flushRemote(){
+    if(!pendingRemote || board.querySelector(".edit-input, .task.dragging")) return;
+    var p = pendingRemote;
+    pendingRemote = null;
+    applyRemote(p.data);
+  }
+
+  /* ---------- sync dialog ---------- */
+  var syncBtn = $("#sync-btn");
+  var syncOverlay = $("#sync-overlay");
+  var syncStatus = "off";
+  var STATUS_TEXT = { synced:"Synced", syncing:"Syncing…", error:"Sync error — check your connection", off:"Not syncing" };
+
+  function setSyncStatus(s){ syncStatus = s; renderSyncUI(); }
+  function renderSyncUI(){
+    var user = cloud.user;
+    $("#sync-dot").dataset.status = user ? syncStatus : "off";
+    $("#sync-dot-big").dataset.status = syncStatus;
+    $("#sync-btn-label").textContent = user ? "Sync" : "Sign in";
+    syncBtn.title = user ? STATUS_TEXT[syncStatus] : "Sign in to sync across devices";
+    $("#sync-signed-out").hidden = !!user;
+    $("#sync-signed-in").hidden = !user;
+    $("#sync-email").textContent = user ? (user.email || user.displayName || "Google account") : "";
+    $("#sync-status-text").textContent = STATUS_TEXT[syncStatus];
+  }
+  function openSync(open){
+    syncOverlay.hidden = !open;
+    syncBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    if(open) openMenu(false);
+  }
+  syncBtn.addEventListener("click", function(e){ e.stopPropagation(); openSync(true); });
+  $("#sync-close").addEventListener("click", function(){ openSync(false); });
+  syncOverlay.addEventListener("click", function(e){ if(e.target === syncOverlay) openSync(false); });
+  $("#sign-in").addEventListener("click", function(){ cloud.signIn(); });
+  $("#sign-out").addEventListener("click", function(){ cloud.signOut(); });
+
   /* ---------- go ---------- */
   syncToggleLabel();
+  save();     // persist any migrated ids right away
   render();
+  if(CLOUD_ENABLED){
+    syncBtn.hidden = false;
+    $("#about-storage").textContent = "Saved in your browser — sign in to sync across devices";
+    renderSyncUI();
+    cloud.init();
+  }
+
+  // Offline support + "Add to Home Screen".
+  if("serviceWorker" in navigator && location.protocol === "https:"){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
 })();
 </script>
 </body>
